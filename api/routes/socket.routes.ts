@@ -10,6 +10,10 @@ export function registerSocketEvents(io: Server): void {
     // Manejar nueva conexión
     peerController.handleConnection(socket, io);
 
+    // ============================================
+    // 📹 EVENTOS DE WEBRTC
+    // ============================================
+    
     // Evento: señal WebRTC
     socket.on("signal", (to: string, from: string, data: any) => {
       peerController.handleSignal(socket, io, to, from, data);
@@ -25,10 +29,42 @@ export function registerSocketEvents(io: Server): void {
       peerController.handleScreenShareStopped(socket, io, userId);
     });
     
-    //Solicitar lista de peers activos
+    // Solicitar lista de peers activos
     socket.on("getActivePeers", () => {
       peerController.handleGetActivePeers(socket);
     });
+    
+    // ============================================
+    // 💬 EVENTOS DE CHAT
+    // ============================================
+    
+    // Evento: nuevo usuario se une al chat
+    socket.on("newUser", (username: string) => {
+      console.log(`💬 New user joined chat: ${username} (${socket.id})`);
+      
+      // Opcional: notificar a otros usuarios que alguien se unió
+      socket.broadcast.emit("chat:userJoined", {
+        userId: username,
+        timestamp: new Date().toISOString()
+      });
+    });
+
+    // Evento: mensaje de chat
+    socket.on("chat:message", (payload: { userId: string; message: string }) => {
+      console.log(`💬 Message from ${payload.userId}: ${payload.message}`);
+      
+      const messageWithTimestamp = {
+        ...payload,
+        timestamp: new Date().toISOString()
+      };
+      
+      // Enviar mensaje a TODOS (incluyendo el remitente)
+      io.emit("chat:message", messageWithTimestamp);
+    });
+    
+    // ============================================
+    // 🔧 EVENTOS DE SISTEMA
+    // ============================================
     
     // Responder a ping
     socket.on("pong", () => {
@@ -46,6 +82,10 @@ export function registerSocketEvents(io: Server): void {
       console.error(`❌ Socket error for ${socket.id}:`, error);
     });
   });
+
+  // ============================================
+  // 📊 MONITOREO DEL SERVIDOR
+  // ============================================
   
   // Log del servidor cada minuto
   setInterval(() => {
