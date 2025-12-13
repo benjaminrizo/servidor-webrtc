@@ -47,19 +47,18 @@ export class PeerController {
    * Manejar inicio de compartir pantalla
    */
   handleScreenShareStarted(socket: Socket, io: Server, userId: string): void {
-    console.log("Screen share started by:", userId);
-    // Notificar a todos los demás peers
-    socket.broadcast.emit("screenShareStarted", userId);
-  }
+  console.log(`User ${userId} started screen sharing`);
+  // Notificar a todos los demás peers
+  socket.broadcast.emit("screenShareStarted", userId);
+}
 
   /**
    * Manejar detención de compartir pantalla
    */
   handleScreenShareStopped(socket: Socket, io: Server, userId: string): void {
-    console.log("Screen share stopped by:", userId);
-    // Notificar a todos los demás peers
-    socket.broadcast.emit("screenShareStopped", userId);
-  }
+  console.log(`User ${userId} stopped screen sharing`);
+  socket.broadcast.emit("screenShareStopped", userId);
+}
 
   /**
    * Manejar desconexión de peer
@@ -79,4 +78,5 @@ export class PeerController {
       );
     }
   }
+  
 }
