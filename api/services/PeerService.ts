@@ -2,6 +2,8 @@ import PeerDAO from "../dao/PeerDAO";
 import type { Peer, SignalPayload } from "../models/Peer.model";
 
 class PeerService {
+  private screenSharingUserId: string | null = null;
+
   /**
    * Agregar un nuevo peer
    */
@@ -31,6 +33,10 @@ class PeerService {
    * Remover un peer
    */
   removePeer(socketId: string): boolean {
+    // Si el peer que se remueve estaba compartiendo pantalla, limpiar
+    if (this.screenSharingUserId === socketId) {
+      this.screenSharingUserId = null;
+    }
     return PeerDAO.delete(socketId);
   }
 
@@ -53,6 +59,34 @@ class PeerService {
    */
   validateSignalPayload(payload: SignalPayload): boolean {
     return !!(payload.to && payload.from && payload.data);
+  }
+
+  /**
+   * Establecer el usuario que está compartiendo pantalla
+   */
+  setScreenSharingUser(socketId: string): void {
+    this.screenSharingUserId = socketId;
+  }
+
+  /**
+   * Obtener el usuario que está compartiendo pantalla
+   */
+  getScreenSharingUser(): string | null {
+    return this.screenSharingUserId;
+  }
+
+  /**
+   * Limpiar el usuario que está compartiendo pantalla
+   */
+  clearScreenSharingUser(): void {
+    this.screenSharingUserId = null;
+  }
+
+  /**
+   * Verificar si alguien está compartiendo pantalla
+   */
+  isScreenSharingActive(): boolean {
+    return this.screenSharingUserId !== null;
   }
 }
 

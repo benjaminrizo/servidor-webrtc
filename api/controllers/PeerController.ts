@@ -1,6 +1,5 @@
 import type { Socket, Server } from "socket.io";
 import PeerService from "../services/PeerService";
-import type { SignalPayload } from "../models/Peer.model";
 
 export class PeerController {
   /**
@@ -42,6 +41,24 @@ export class PeerController {
     } else {
       console.log("Peer not found! Target:", to);
     }
+  }
+
+  /**
+   * Manejar inicio de compartir pantalla
+   */
+  handleScreenShareStarted(socket: Socket, io: Server, userId: string): void {
+    console.log("Screen share started by:", userId);
+    // Notificar a todos los demás peers
+    socket.broadcast.emit("screenShareStarted", userId);
+  }
+
+  /**
+   * Manejar detención de compartir pantalla
+   */
+  handleScreenShareStopped(socket: Socket, io: Server, userId: string): void {
+    console.log("Screen share stopped by:", userId);
+    // Notificar a todos los demás peers
+    socket.broadcast.emit("screenShareStopped", userId);
   }
 
   /**
